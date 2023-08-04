@@ -1,0 +1,131 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace MatchingGame
+{
+    public partial class Form1 : Form
+    {
+        Label firstClicked = null; //firstClicked wskazuje, że jak gracz kliknie to będzie null - Jeśli nie kliknął jeszcze Label
+        Label secondClicked = null;
+        Random random = new Random(); //losowe wybieranie icons w tych kwadratach
+        List<string> icons = new List<string>() //List<string> - przechowuje te symbole, ktore sie wylosowaly
+         {
+             "w", "w", "O", "O", "l", "l", "p", "p", //kazda litera oznacza okreslony symbol
+             "b", "b", "L", "L", "$", "$", "@", "@",
+             "c", "c", "x", "x", ":", ":", "Y", "Y",
+             "a", "a", "r", "r", "U", "U",
+         };
+
+        private void AssignIconsToSquares()
+        {
+            //tabela ma 16 kratek, do kazdej wklada sie icone w randomowych miejscach
+
+            foreach (Control control in tableLayoutPanel3.Controls) //foreach wykonuje instrukcje dla kazdego elementu w wystapieniu typu
+            {
+                Label iconLabel = control as Label; //
+                if (iconLabel != null)
+                {
+                    int randomNumber = random.Next(icons.Count); //tworzymy zmienna o nazwie randomNumber, ktora ma losowy symbol z elementow. Count - liczba z listy ikon
+                    iconLabel.Text = icons[randomNumber]; //przypisuje jeden z elementów listy ikon do Text właściwości etykiety
+                    iconLabel.ForeColor = iconLabel.BackColor; //zamienia je na zakryte
+                    icons.RemoveAt(randomNumber); //usuwanie ikony z listy
+                }
+            }
+        }
+
+        public Form1()
+        {
+            InitializeComponent();
+            AssignIconsToSquares();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Label clickedLabel = sender as Label;
+
+            if (clickedLabel != null)
+            {
+                if (clickedLabel.ForeColor == Color.Black)
+                    return;
+
+                if (firstClicked == null)
+                {
+                    firstClicked = clickedLabel;
+                    firstClicked.ForeColor = Color.Black;
+                }
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            // tutaj odpala sie timer gdzie dziala on tylko po odkryciu drugiej karty w grze i gdy nie pasuja do siebie to znikaja obydwie karty
+
+            if (timer1.Enabled == true) //ignoruje klikniecia kiedy dzial timer tz. jak odkryjemy druga karte i nie pasuja do siebie to odpala sie timer i podczas jeggo dzialania nie pozwala na wykonanie zadniej interakcji
+                return;
+
+            Label clickedLabel = sender as Label;
+
+            if (clickedLabel != null)
+            {
+                if (clickedLabel.ForeColor == Color.Black) // gdy kliknieta icona jest czarna to player juz kliknal i program ignoruje klikniecia
+                    return;
+
+                if (firstClicked == null) //pierwza odkryta karta ktora kliknal gracz zmienia kolor na czarny i spowrotem 
+                {
+                    firstClicked = clickedLabel;
+                    firstClicked.ForeColor = Color.Black;
+                    return;
+                }
+
+                secondClicked = clickedLabel; //kiedy nic nie klikniemy to timer nie ruszy. Dopero jak odkryjemy druga karte
+                secondClicked.ForeColor = Color.Black;
+
+                CheckForWinner(); //sprawdzanie czy przypadkiem player nie wygral 
+
+                if (firstClicked.Text == secondClicked.Text) //kiedy znajdziemy pasuajce icony yo zostaja czarne i resetujemy firstClicked and secondClicked zeby mogl odwrocic kolejne icony
+                {
+                    firstClicked = null;
+                    secondClicked = null;
+                    return;
+                }
+
+                timer1.Start(); // odpalenie timera kiedy dwa rozne odkryje icony 
+            }
+        }
+
+        private void CheckForWinner()
+        {
+            // Go through all of the labels in the TableLayoutPanel, 
+            // checking each one to see if its icon is matched
+            foreach (Control control in tableLayoutPanel3.Controls) //przechodzi przez wszytskie tabele/kratki i sprawdza czy sa odkryte i w czarnym kolorze. Jak nie to gramy dalej 
+            {
+                Label iconLabel = control as Label;
+
+                if (iconLabel != null)
+                {
+                    if (iconLabel.ForeColor == iconLabel.BackColor)
+                        return;
+                }
+            }
+            MessageBox.Show("You matched all the icons!", "Congratulations"); //kiedy nie znalazl zadnej zakrytej kratki to zwraca wiadoosc w specjalnym messagebox na srodku ekranu
+            Close(); //zamyka dzialanie programu tzn po kliknieciu "ok" zamyka gre
+        }
+
+        private void timer1_Tick_1(object sender, EventArgs e)
+        {
+            //timer sie uruchamia kiedy player kliknie icon ktore nie pasuja do siebie i one beda odkryte przez kilka sek i nastepnie sie zakryja
+            timer1.Stop(); //stoper sie zatrzymuje
+            firstClicked.ForeColor = firstClicked.BackColor; //odkrywa dwie icony
+            secondClicked.ForeColor = secondClicked.BackColor; //odkrywa dwie icony
+            firstClicked = null; // resetuje klikiecie zeby progral taktowal je jako pierwsze odkrcie
+            secondClicked = null; // resetuje klikiecie zeby progral taktowal je jako pierwsze odkrcie
+        }
+    }
+}
