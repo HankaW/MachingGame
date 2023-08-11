@@ -40,7 +40,7 @@ namespace MatchingGame
                 }
             }
         }
-        private int _countDown = 8; // Seconds
+        private int _countDown = 80; // Seconds
         //private Timer _timer;
         public Form1()
         {
@@ -156,7 +156,7 @@ namespace MatchingGame
 
         }
 
-        private void selfgame()
+       /* private void selfgame()
         {
             foreach (Control c1 in tableLayoutPanel3.Controls)
             {
@@ -176,7 +176,7 @@ namespace MatchingGame
                     }
             }
         }
-
+       */
         private void setTimer(int label)
         {
             lTimer.Text = $"Timer:{label}";
@@ -200,7 +200,7 @@ namespace MatchingGame
                 CheckForWinner();
 
             }
-            selfgame();
+           // selfgame();
 
         }
 
